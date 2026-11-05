@@ -1,0 +1,118 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email != null && request.auth.token.email == 'fatiufaruk7@gmail.com') ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isSeller() {
+      return isSignedIn() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'seller')
+      );
+    }
+
+    // Health check test path
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Products collection: public read, sellers & admins write
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isSignedIn() && (isSeller() || isAdmin()) && isValidId(productId);
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (isSeller() && (
+          !('sellerId' in existing()) ||
+          existing().sellerId == request.auth.uid
+        ))
+      );
+      allow delete: if isAdmin() || (isSeller() && existing().sellerId == request.auth.uid);
+    }
+
+    // Categories collection: public read, admin write
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Users collection: owner or admin read/write, customers cannot elevate role to admin
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && (
+        incoming().role == 'customer' ||
+        incoming().role == 'seller' ||
+        isAdmin()
+      );
+      allow update: if isOwner(userId) && (
+        isAdmin() ||
+        (incoming().role != 'admin' && (incoming().role == 'customer' || incoming().role == 'seller'))
+      ) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Carts collection: user-owned private shopping carts
+    match /carts/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Wishlists collection: user-owned saved items
+    match /wishlists/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Orders collection: customers create/view their own, sellers & admins can fulfill
+    match /orders/{orderId} {
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow get: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin() ||
+        isSeller()
+      );
+      allow list: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        isAdmin() ||
+        isSeller()
+      );
+      allow update: if isAdmin() || isSeller();
+      allow delete: if isAdmin();
+    }
+
+    // Admins registry: strictly admin access
+    match /admins/{userId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

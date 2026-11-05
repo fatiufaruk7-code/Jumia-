@@ -1,0 +1,297 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Item in the JUMIA e-commerce catalog",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique product ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Product display title",
+          "maxLength": 300
+        },
+        "brand": {
+          "type": "string",
+          "description": "Brand name",
+          "maxLength": 100
+        },
+        "category": {
+          "type": "string",
+          "description": "Category slug identifier",
+          "maxLength": 100
+        },
+        "price": {
+          "type": "number",
+          "description": "Current price in Nigerian Naira"
+        },
+        "originalPrice": {
+          "type": "number",
+          "description": "Strikethrough original price"
+        },
+        "discountPercent": {
+          "type": "number",
+          "description": "Percentage discount"
+        },
+        "rating": {
+          "type": "number",
+          "description": "Star rating average"
+        },
+        "ratingCount": {
+          "type": "number",
+          "description": "Number of ratings"
+        },
+        "image": {
+          "type": "string",
+          "description": "Product image URL"
+        },
+        "isJumiaExpress": {
+          "type": "boolean",
+          "description": "Eligible for fast Jumia Express delivery"
+        },
+        "isOfficialStore": {
+          "type": "boolean",
+          "description": "Sold by verified brand flagship store"
+        },
+        "inStock": {
+          "type": "boolean",
+          "description": "Stock availability"
+        },
+        "stockCount": {
+          "type": "number",
+          "description": "Available stock quantity"
+        },
+        "isFlashSale": {
+          "type": "boolean",
+          "description": "Featured in Jumia Flash Sales"
+        },
+        "sellerId": {
+          "type": "string",
+          "description": "UID of the seller merchant who owns the product"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed product description",
+          "maxLength": 5000
+        }
+      },
+      "required": ["id", "title", "price", "category", "brand"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "JUMIA product category taxonomy",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Category ID"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the category",
+          "maxLength": 100
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-friendly slug",
+          "maxLength": 100
+        },
+        "iconName": {
+          "type": "string",
+          "description": "Lucide icon identifier",
+          "maxLength": 50
+        }
+      },
+      "required": ["id", "name", "slug"]
+    },
+    "User": {
+      "title": "User",
+      "description": "JUMIA user profile and account details",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Firebase Auth UID"
+        },
+        "name": {
+          "type": "string",
+          "description": "User full name",
+          "maxLength": 150
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address",
+          "maxLength": 250
+        },
+        "phone": {
+          "type": "string",
+          "description": "Nigerian phone number",
+          "maxLength": 30
+        },
+        "role": {
+          "type": "string",
+          "description": "Access control role: customer, seller, or admin",
+          "enum": ["customer", "seller", "admin"]
+        },
+        "walletBalance": {
+          "type": "number",
+          "description": "Jumia Wallet store credit balance in Naira"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Account creation timestamp"
+        }
+      },
+      "required": ["id", "email", "role"]
+    },
+    "Cart": {
+      "title": "Cart",
+      "description": "User shopping cart state",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner user UID"
+        },
+        "items": {
+          "type": "string",
+          "description": "JSON serialized or structured items in cart"
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "Cart items subtotal in Naira"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last updated timestamp"
+        }
+      },
+      "required": ["userId"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order placed on JUMIA",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Jumia order number e.g. JUM-NG-123456"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Customer UID who placed the order"
+        },
+        "date": {
+          "type": "string",
+          "description": "Formatted order date"
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "Order subtotal"
+        },
+        "deliveryFee": {
+          "type": "number",
+          "description": "Shipping fee"
+        },
+        "discount": {
+          "type": "number",
+          "description": "Coupon discount applied"
+        },
+        "total": {
+          "type": "number",
+          "description": "Final paid total in Naira"
+        },
+        "deliveryMethod": {
+          "type": "string",
+          "enum": ["door", "pickup"]
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": ["jumiapay", "card", "bank_transfer", "cod"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "confirmed", "shipped", "delivered"]
+        },
+        "estimatedDelivery": {
+          "type": "string",
+          "maxLength": 100
+        }
+      },
+      "required": ["id", "userId", "total", "status"]
+    },
+    "Wishlist": {
+      "title": "Wishlist",
+      "description": "User saved items",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "User UID"
+        },
+        "itemIds": {
+          "type": "string",
+          "description": "Array or list of saved product IDs"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last modified timestamp"
+        }
+      },
+      "required": ["userId"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized admin registry document",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Admin UID"
+        },
+        "email": {
+          "type": "string",
+          "description": "Admin email"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role level"
+        }
+      },
+      "required": ["userId", "email"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Publicly browseable marketplace products"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Product categories"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles with role and wallet"
+    },
+    "/carts/{userId}": {
+      "schema": "Cart",
+      "description": "Shopping carts private to user"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer purchase orders"
+    },
+    "/wishlists/{userId}": {
+      "schema": "Wishlist",
+      "description": "Customer wishlists"
+    },
+    "/admins/{userId}": {
+      "schema": "Admin",
+      "description": "Platform administrator credentials"
+    }
+  }
+}

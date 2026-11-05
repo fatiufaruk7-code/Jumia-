@@ -1,0 +1,6 @@
+{
+  "name": "JUMIA",
+  "description": "JUMIA Nigeria - Online Shopping for Electronics, Phones, Fashion, Groceries & more with fast delivery across Nigeria.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
